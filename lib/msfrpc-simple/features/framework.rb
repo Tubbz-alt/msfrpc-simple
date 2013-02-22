@@ -72,7 +72,7 @@ module Msf
             output = ""
             module_list.each do |m|
               #m[:module_option_string] = "RHOSTS #{range}, USER_FILE /opt/metasploit/msf3/data/wordlists/unix_users.txt, PASS_FILE /opt/metasploit/msf3/data/wordlists/unix_passwords.txt"
-              m[:module_option_string] = "RHOSTS #{range}, USERNAME root, PASSWORD root"
+              m[:module_option_string] = "RHOSTS #{range}, USERNAME root, PASSWORD root, THREADS 5"
 
               # store this module's name in the output
               output += "=== #{m[:module_name]} ===\n"
