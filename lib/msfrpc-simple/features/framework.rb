@@ -18,18 +18,18 @@ module Msf
               {:module_name => "auxiliary/scanner/http/http_version"}, 
               #{:module_name => "auxiliary/scanner/http/cert"}, 
               {:module_name => "auxiliary/scanner/ftp/ftp_version"},
-              {:module_name => "auxiliary/scanner/h323/h323_version"},
-              {:module_name => "auxiliary/scanner/imap/imap_version"},
+              #{:module_name => "auxiliary/scanner/h323/h323_version"},
+              #{:module_name => "auxiliary/scanner/imap/imap_version"},
               #{:module_name => "auxiliary/scanner/portscan/syn"},
               #{:module_name => "auxiliary/scanner/portscan/tcp"},
               #{:module_name => "auxiliary/scanner/lotus/lotus_domino_version"},
-              {:module_name => "auxiliary/scanner/mysql/mysql_version"},
+              #{:module_name => "auxiliary/scanner/mysql/mysql_version"},
               #{:module_name => "auxiliary/scanner/netbios/nbname"},
               #{:module_name => "auxiliary/scanner/netbios/nbname_probe"},
               #{:module_name => "auxiliary/scanner/pcanywhere/pcanywhere_tcp"},
               #{:module_name => "auxiliary/scanner/pcanywhere/pcanywhere_udp"},
-              {:module_name => "auxiliary/scanner/pop3/pop3_version"},
-              {:module_name => "auxiliary/scanner/postgres/postgres_version"},
+              #{:module_name => "auxiliary/scanner/pop3/pop3_version"},
+              #{:module_name => "auxiliary/scanner/postgres/postgres_version"},
               {:module_name => "auxiliary/scanner/smb/smb_version"},
               {:module_name => "auxiliary/scanner/snmp/snmp_enum"},
               {:module_name => "auxiliary/scanner/ssh/ssh_version"},
@@ -57,22 +57,22 @@ module Msf
           def bruteforce_range(range)
 
             module_list = [
-              {:module_name => "auxiliary/scanner/ftp/ftp_login"}, 
+              #{:module_name => "auxiliary/scanner/ftp/ftp_login"}, 
               {:module_name => "auxiliary/scanner/http/http_login"}, 
               {:module_name => "auxiliary/scanner/smb/smb_login"}, 
-              {:module_name => "auxiliary/scanner/mssql/mssql_login"}, 
-              {:module_name => "auxiliary/scanner/mysql/mysql_login"}, 
-              {:module_name => "auxiliary/scanner/pop3/pop3_login"}, 
+              #{:module_name => "auxiliary/scanner/mssql/mssql_login"}, 
+              #{:module_name => "auxiliary/scanner/mysql/mysql_login"}, 
+              #{:module_name => "auxiliary/scanner/pop3/pop3_login"}, 
               {:module_name => "auxiliary/scanner/smb/smb_login"}, 
               {:module_name => "auxiliary/scanner/snmp/snmp_login"}, 
               {:module_name => "auxiliary/scanner/ssh/ssh_login"}, 
-              {:module_name => "auxiliary/scanner/telnet/telnet_login"}, 
+              #{:module_name => "auxiliary/scanner/telnet/telnet_login"}, 
             ]
 
             output = ""
             module_list.each do |m|
-              #m[:module_option_string] = "RHOSTS #{range}, USER_FILE /opt/metasploit/msf3/data/wordlists/unix_users.txt, PASS_FILE /opt/metasploit/msf3/data/wordlists/unix_passwords.txt"
-              m[:module_option_string] = "RHOSTS #{range}, USERNAME root, PASSWORD root, THREADS 5"
+              #m[:module_option_string] = "RHOSTS #{range}, "
+              m[:module_option_string] = "RHOSTS #{range}, USER_FILE /opt/metasploit/msf3/data/wordlists/pwnie_users.txt, PASS_FILE /opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt, THREADS 5"
 
               # store this module's name in the output
               output += "=== #{m[:module_name]} ===\n"
