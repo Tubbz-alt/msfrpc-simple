@@ -1,7 +1,7 @@
 module Msf
   module RPC
     module Simple
-      module Features 
+      module Features
         module Framework
 
           #
@@ -14,9 +14,9 @@ module Msf
             #  - auxiliary/scanner/smb/pipe_dcerpc_auditor
             #  - auxiliary/scanner/smb/smb_enumshares
             #  - auxiliary/scanner/smb/smb_enumusers
-            modules_and_options = [ 
-              {:module_name => "auxiliary/scanner/http/http_version"}, 
-              #{:module_name => "auxiliary/scanner/http/cert"}, 
+            modules_and_options = [
+              {:module_name => "auxiliary/scanner/http/http_version"},
+              #{:module_name => "auxiliary/scanner/http/cert"},
               {:module_name => "auxiliary/scanner/ftp/ftp_version"},
               {:module_name => "auxiliary/scanner/h323/h323_version"},
               {:module_name => "auxiliary/scanner/imap/imap_version"},
@@ -54,25 +54,18 @@ module Msf
           #
           # This module runs a number of _login modules
           #
-          def bruteforce_range(range)
+          def bruteforce_range(range, user_file='/opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt', pass_file='/opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt')
 
             module_list = [
-              #{:module_name => "auxiliary/scanner/ftp/ftp_login"}, 
-              #{:module_name => "auxiliary/scanner/http/http_login"}, 
-              #{:module_name => "auxiliary/scanner/smb/smb_login"}, 
-              #{:module_name => "auxiliary/scanner/mssql/mssql_login"}, 
-              #{:module_name => "auxiliary/scanner/mysql/mysql_login"}, 
-              #{:module_name => "auxiliary/scanner/pop3/pop3_login"}, 
-              #{:module_name => "auxiliary/scanner/smb/smb_login"}, 
-              #{:module_name => "auxiliary/scanner/snmp/snmp_login"}, 
-              {:module_name => "auxiliary/scanner/ssh/ssh_login"}, 
-              #{:module_name => "auxiliary/scanner/telnet/telnet_login"}, 
+              {:module_name => "auxiliary/scanner/http/http_login"},
+              {:module_name => "auxiliary/scanner/smb/smb_login"},
+              {:module_name => "auxiliary/scanner/snmp/snmp_login"},
+              {:module_name => "auxiliary/scanner/ssh/ssh_login"},
             ]
 
             output = ""
             module_list.each do |m|
-              #m[:module_option_string] = "RHOSTS #{range}, USER_FILE /opt/metasploit/msf3/data/wordlists/unix_users.txt, PASS_FILE /opt/metasploit/msf3/data/wordlists/unix_passwords.txt"
-              m[:module_option_string] = "RHOSTS #{range}, USERNAME root, PASSWORD root, THREADS 5"
+              m[:module_option_string] = "RHOSTS #{range}, USER_FILE #{user_file}, PASS_FILE #{pass_file}, THREADS 5"
 
               # store this module's name in the output
               output += "=== #{m[:module_name]} ===\n"
@@ -101,17 +94,17 @@ module Msf
 
             # split up the module name into type / name
             module_type = module_name.split("/").first
-            raise "Error, bad module name" unless ["exploit", "auxiliary", "post", "encoder", "nop"].include? module_type  
-            
+            raise "Error, bad module name" unless ["exploit", "auxiliary", "post", "encoder", "nop"].include? module_type
+
             # TODO - we may have to deal w/ targets somehow
 
             #info = @client.call("module.execute", module_type, module_name, module_options)
             #@client.call("job.info", info["job_id"])
 
-            # The module output will be not available when run this way; to 
+            # The module output will be not available when run this way; to
             # capture the result of the print_* commands, you have to set the
             # output driver of the module to something you can read from (Buffer,
-            # File, etc). For your use case, the best bet is to run the module 
+            # File, etc). For your use case, the best bet is to run the module
             # via the Console API instead of module.execute, and use that to read
             # the output from the console itself, which provides buffer output for you.
             output = ""
@@ -151,7 +144,7 @@ module Msf
             # do an initial read of the module's output
             module_output = @client.call("console.read", console_id)
             output += "#{module_output['data']}"
-          
+
             until !module_output["busy"] do
               module_output = @client.call("console.read", console_id)
               output += "#{module_output['data']}"
@@ -164,7 +157,7 @@ module Msf
               output += "#{module_output['data']}"
             end
 
-            # Clean up 
+            # Clean up
             @client.call("console.destroy", console_id)
 
           output
