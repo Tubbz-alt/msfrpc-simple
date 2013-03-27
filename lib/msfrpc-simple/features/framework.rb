@@ -18,18 +18,18 @@ module Msf
               {:module_name => "auxiliary/scanner/http/http_version"},
               #{:module_name => "auxiliary/scanner/http/cert"},
               {:module_name => "auxiliary/scanner/ftp/ftp_version"},
-              {:module_name => "auxiliary/scanner/h323/h323_version"},
-              {:module_name => "auxiliary/scanner/imap/imap_version"},
+              #{:module_name => "auxiliary/scanner/h323/h323_version"},
+              #{:module_name => "auxiliary/scanner/imap/imap_version"},
               #{:module_name => "auxiliary/scanner/portscan/syn"},
               #{:module_name => "auxiliary/scanner/portscan/tcp"},
               #{:module_name => "auxiliary/scanner/lotus/lotus_domino_version"},
-              {:module_name => "auxiliary/scanner/mysql/mysql_version"},
+              #{:module_name => "auxiliary/scanner/mysql/mysql_version"},
               #{:module_name => "auxiliary/scanner/netbios/nbname"},
               #{:module_name => "auxiliary/scanner/netbios/nbname_probe"},
               #{:module_name => "auxiliary/scanner/pcanywhere/pcanywhere_tcp"},
               #{:module_name => "auxiliary/scanner/pcanywhere/pcanywhere_udp"},
-              {:module_name => "auxiliary/scanner/pop3/pop3_version"},
-              {:module_name => "auxiliary/scanner/postgres/postgres_version"},
+              #{:module_name => "auxiliary/scanner/pop3/pop3_version"},
+              #{:module_name => "auxiliary/scanner/postgres/postgres_version"},
               {:module_name => "auxiliary/scanner/smb/smb_version"},
               {:module_name => "auxiliary/scanner/snmp/snmp_enum"},
               {:module_name => "auxiliary/scanner/ssh/ssh_version"},
@@ -54,7 +54,11 @@ module Msf
           #
           # This module runs a number of _login modules
           #
-          def bruteforce_range(range, user_file='/opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt', pass_file='/opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt')
+          def bruteforce_range(range, user_file=nil, pass_file=nil)
+
+            # these were too long for method arg defaults
+            user_file = user_file || '/opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt'
+            pass_file = pass_file || '/opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt'
 
             module_list = [
               {:module_name => "auxiliary/scanner/http/http_login"},
@@ -88,9 +92,6 @@ module Msf
           def execute_module_and_return_output(options)
             module_name = options[:module_name]
             module_option_string = options[:module_option_string]
-
-            puts "module: #{module_name}"
-            puts "options: #{module_option_string}"
 
             # split up the module name into type / name
             module_type = module_name.split("/").first
