@@ -26,16 +26,16 @@ module Msf
 
           # configure default options
           @options = {
-            :project => user_options[:project] || "default", 
+            :project => user_options[:project] || "default",
             :port => user_options[:project] || 55553,
-            :user => user_options[:rpc_user], 
-            :pass => user_options[:rpc_pass], 
+            :user => user_options[:rpc_user],
+            :pass => user_options[:rpc_pass],
             :db_host => user_options[:db_host] || "localhost",
             :db_user => user_options[:db_user],
             :db_pass => user_options[:db_pass],
             :db => user_options[:db_name] || "msf"
           }
-          
+
           @options.merge!(user_options)
 
           #
@@ -64,8 +64,8 @@ module Msf
         #
         # This method is ugly for a number of reasons, but there doesn't
         # appear to be a way to be notified when the command is completed
-        # nor when the 
-        # 
+        # nor when the
+        #
         #
         # returns a valid xml string
         def create_report
@@ -79,7 +79,7 @@ module Msf
           begin
             xml_string = ""
             status = Timeout::timeout(240) {
-              # We don't know when the file is going to show up, so 
+              # We don't know when the file is going to show up, so
               # wait for it...
               until File.exists? report_path do
                 sleep 1
@@ -90,7 +90,7 @@ module Msf
                   sleep 5
                   xml_string = File.read(report_path)
               end
-              
+
               File.delete(report_path)
             }
           rescue Timeout::Error
@@ -106,7 +106,7 @@ module Msf
         end
 
         def connected?
-          return true if @client.call("core.version")   
+          return true if @client.call("core.version")
         end
 
         private
@@ -136,8 +136,7 @@ module Msf
             # Very very hacky. -- There should be a way to check
             # status of a call to make sure that it isn't in an error
             # state. For now, check the output for known error heuristics
-            return output_string if output_string =~ /Error/
-            return output_string if output_string =~ /[-]/
+            return output_string if output_string =~ /(\[-\]|Error)/
 
             # Read until finished
             while (!output.has_key?("result")) do
@@ -146,7 +145,7 @@ module Msf
               output = @client.call("console.read", console["id"])
               return "Error" if output["result"] == "failure"
             end
-          
+
             # Clean up console
             #@client.call("console.destroy", console["id"])
 
