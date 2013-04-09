@@ -14,8 +14,6 @@ module Msf
         include Msf::RPC::Simple::Features::Framework
         include Msf::RPC::Simple::Features::Pro
 
-        #attr_accessor :options
-
         # Public: Create a simple client object.
         #
         # user_options - hash of options to include in our initial connection.
@@ -82,22 +80,22 @@ module Msf
               # We don't know when the file is going to show up, so
               # wait for it...
               until File.exists? report_path do
-                sleep 1
+              sleep 1
               end
 
-              # Read and clean up the file when it exists...
-              until xml_string.include? "</MetasploitV4>" do
-                  sleep 5
-                  xml_string = File.read(report_path)
-              end
+            # Read and clean up the file when it exists...
+            until xml_string.include? "</MetasploitV4>" do
+              sleep 5
+              xml_string = File.read(report_path)
+            end
 
-              File.delete(report_path)
+            File.delete(report_path)
             }
           rescue Timeout::Error
             xml_string = "<MetasploitV4></MetasploitV4>"
           end
 
-        xml_string
+          xml_string
         end
 
         def cleanup
@@ -120,23 +118,23 @@ module Msf
         end
 
         def _send_command(command)
-            # Create the console and get its id
-            console = @client.call("console.create")
+          # Create the console and get its id
+          console = @client.call("console.create")
 
-            # Do an initial read / discard to pull out any info on the console
-            # then write the command to the console
-            @client.call("console.read", console["id"])
-            @client.call("console.write", console["id"], "#{command}\n")
+          # Do an initial read / discard to pull out any info on the console
+          # then write the command to the console
+          @client.call("console.read", console["id"])
+          @client.call("console.write", console["id"], "#{command}\n")
 
-            # Initial read
-            output_string = ""
-            output = @client.call("console.read", console["id"])
-            output_string += "#{output['data']}"
+          # Initial read
+          output_string = ""
+          output = @client.call("console.read", console["id"])
+          output_string += "#{output['data']}"
 
-            # Very very hacky. -- There should be a way to check
-            # status of a call to make sure that it isn't in an error
-            # state. For now, check the output for known error heuristics
-            return output_string if output_string =~ /(\[-\]|Error)/
+          # Very very hacky. -- There should be a way to check
+          # status of a call to make sure that it isn't in an error
+          # state. For now, check the output for known error heuristics
+          return output_string if output_string =~ /(\[-\]|Error)/
 
             # Read until finished
             while (!output.has_key?("result")) do
@@ -146,12 +144,11 @@ module Msf
               return "Error" if output["result"] == "failure"
             end
 
-            # Clean up console
-            #@client.call("console.destroy", console["id"])
+          # Clean up console
+          #@client.call("console.destroy", console["id"])
 
-        output_string
+          output_string
         end
-
       end
     end
   end
