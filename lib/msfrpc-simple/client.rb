@@ -131,12 +131,20 @@ module Msf
             # Initial read
             output_string = ""
             output = @client.call("console.read", console["id"])
+            output_string += "#{output['data']}"
+
+            # Very very hacky. -- There should be a way to check
+            # status of a call to make sure that it isn't in an error
+            # state. For now, check the output for known error heuristics
+            return output_string if output_string =~ /Error/
+            return output_string if output_string =~ /[-]/
 
             # Read until finished
-            while (output["busy"] == true) do
+            while (!output.has_key?("result")) do
+              return unless output["busy"]
               output_string += "#{output['data']}"
               output = @client.call("console.read", console["id"])
-              output_string = "Error" if output["result"] == "failure"
+              return "Error" if output["result"] == "failure"
             end
           
             # Clean up console
