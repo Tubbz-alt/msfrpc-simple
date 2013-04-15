@@ -14,6 +14,7 @@ module Msf
             #  - auxiliary/scanner/smb/pipe_dcerpc_auditor
             #  - auxiliary/scanner/smb/smb_enumshares
             #  - auxiliary/scanner/smb/smb_enumusers
+
             modules_and_options = [
               {:module_name => "auxiliary/scanner/http/http_version"},
               #{:module_name => "auxiliary/scanner/http/cert"},
@@ -38,18 +39,17 @@ module Msf
             ]
 
             output = ""
-            module_list.each do |m|
+            modules_and_options.each do |m|
               # Merge in default options
               m[:module_option_string] =  "RHOSTS #{range}"
 
               # store this module's name in the output
               output += "=== #{m[:module_name]} ===\n"
-              output += execute_module_and_return_output(m)
+              output += _execute_module_and_return_output(m)
             end
 
           output
           end
-
 
           #
           # This module runs a number of _login modules
@@ -57,14 +57,14 @@ module Msf
           def bruteforce_range(range, user_file=nil, pass_file=nil)
 
             # these were too long for method arg defaults
-            user_file = user_file || '/opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt'
-            pass_file = pass_file || '/opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt'
+            user_file = user_file || '/opt/pwnix/insight-api/plugins/network_bruteforce/lib/pwnie_usernames.txt'
+            pass_file = pass_file || '/opt/pwnix/insight-api/plugins/network_bruteforce/lib/pwnie_passwords.txt'
 
             module_list = [
               {:module_name => "auxiliary/scanner/http/http_login"},
               {:module_name => "auxiliary/scanner/smb/smb_login"},
               {:module_name => "auxiliary/scanner/snmp/snmp_login"},
-              {:module_name => "auxiliary/scanner/ssh/ssh_login"},
+              {:module_name => "auxiliary/scanner/ssh/ssh_login"}
             ]
 
             output = ""
@@ -73,23 +73,31 @@ module Msf
 
               # store this module's name in the output
               output += "=== #{m[:module_name]} ===\n"
-              output += execute_module_and_return_output(m)
+              output += _execute_module_and_return_output(m)
             end
 
           output
           end
 
-          #
-          # This module runs a number of exploit modules
-          #
-          def exploit_range(range)
-            return "Not Implemented"
-          end
 
+          private 
+
+=begin
           #
-          # This module simply runs a module
+          # This method runs a module directly (no console)
           #
-          def execute_module_and_return_output(options)
+          def _execute_module(options)
+            module_name = options[:module_name]
+            module_type = options[:module_type]
+
+            # Create the console and get its id
+            @client.call("module.execute", module_name, module_type)
+          end
+=end
+          #
+          # This method runs module through a console
+          #
+          def _execute_module_and_return_output(options)
             module_name = options[:module_name]
             module_option_string = options[:module_option_string]
 
@@ -97,8 +105,7 @@ module Msf
             module_type = module_name.split("/").first
             raise "Error, bad module name" unless ["exploit", "auxiliary", "post", "encoder", "nop"].include? module_type
 
-            # TODO - we may have to deal w/ targets somehow
-
+            # TODO - we have to deal w/ targets somehow, for now, use the default target
             #info = @client.call("module.execute", module_type, module_name, module_options)
             #@client.call("job.info", info["job_id"])
 

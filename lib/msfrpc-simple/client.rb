@@ -14,7 +14,7 @@ module Msf
         include Msf::RPC::Simple::Features::Framework
         include Msf::RPC::Simple::Features::Pro
 
-        #attr_accessor :options
+        attr_accessor :client
 
         # Public: Create a simple client object.
         #
@@ -26,14 +26,17 @@ module Msf
 
           # configure default options
           @options = {
-            :project => user_options[:project] || "default", 
-            :port => user_options[:project] || 55553,
-            :user => user_options[:rpc_user], 
-            :pass => user_options[:rpc_pass], 
+            :pass => user_options[:rpc_pass], ### THE ONLY REQUIRED OPTION
+            :project => user_options[:project] || "default",
+            :port => user_options[:port] || 55553,
+            :host => user_options[:host] || "127.0.0.1",
+            :user => user_options[:rpc_user] || "pwnie",
             :db_host => user_options[:db_host] || "localhost",
-            :db_user => user_options[:db_user],
-            :db_pass => user_options[:db_pass],
-            :db => user_options[:db_name] || "msf"
+            :db_user => user_options[:db_user] || "msf3yo",
+            :db_pass => user_options[:db_pass] || "msf3yo",
+            :db => user_options[:db_name] || "msf",
+            :uri => user_options[:uri] || "/api/",
+            :ssl => user_options[:ssl] || true
           }
           
           @options.merge!(user_options)
@@ -74,7 +77,7 @@ module Msf
           # Create the report using the db_export command
           _send_command("db_export #{report_path}\n")
 
-          # We've sent the command, so let's sit back and wait for th
+          # We've sent the command, so let's sit back and wait for the
           # output to hit the disk.
           begin
             xml_string = ""
@@ -109,6 +112,16 @@ module Msf
           return true if @client.call("core.version")   
         end
 
+        # Public: Send a command to the msfrpc server via a dynamically
+        # generated console
+        # 
+        # command - the string to send to the console, ie. "db_nmap 10.1.1.1/24"
+        #
+        # Returns the output of the command
+        def send_command(command)
+          _send_command(command)
+        end
+
         private
 
         def _connect_database
@@ -120,29 +133,34 @@ module Msf
         end
 
         def _send_command(command)
-            # Create the console and get its id
-            console = @client.call("console.create")
+          # Create the console and get its id
+          console = @client.call("console.create")
 
-            # Do an initial read / discard to pull out any info on the console
-            # then write the command to the console
-            @client.call("console.read", console["id"])
-            @client.call("console.write", console["id"], "#{command}\n")
+          # Do an initial read / discard to pull out any info on the console
+          # then write the command to the console
+          @client.call("console.read", console["id"])
+          @client.call("console.write", console["id"], "#{command}\n")
 
-            # Initial read
-            output_string = ""
-            output = @client.call("console.read", console["id"])
-
-            # Read until finished
-            while (output["busy"] == true) do
-              output_string += "#{output['data']}"
-              output = @client.call("console.read", console["id"])
-              output_string = "Error" if output["result"] == "failure"
-            end
+          # Initial read
+          output_string = ""
+          output = @client.call("console.read", console["id"])
           
-            # Clean up console
-            #@client.call("console.destroy", console["id"])
+          # TODO - hacky. -- There should be a way to check
+          # status of a call to make sure that it isn't in an error
+          # state. For now, check the output for known error heuristics
+          return output_string if output_string =~ /(\[-\]|Error)/
 
-        output_string
+          # Read until finished
+          while (output["busy"] == true) do
+            output_string += "#{output['data']}"
+            output = @client.call("console.read", console["id"])
+            output_string = "Error" if output["result"] == "failure"
+          end
+        
+          # Clean up console
+          @client.call("console.destroy", console["id"])
+
+          output_string
         end
 
       end
