@@ -15,7 +15,6 @@ module Msf
         include Msf::RPC::Simple::Features::Pro
 
         attr_accessor :client
-
         # Public: Create a simple client object.
         #
         # user_options - hash of options to include in our initial connection.
@@ -34,11 +33,11 @@ module Msf
             :db_host => user_options[:db_host] || "localhost",
             :db_user => user_options[:db_user] || "msf3yo",
             :db_pass => user_options[:db_pass] || "msf3yo",
-            :db => user_options[:db_name] || "msf",
+            :db => user_options[:db_name] || "msfX",
             :uri => user_options[:uri] || "/api/",
             :ssl => user_options[:ssl] || true
           }
-          
+
           @options.merge!(user_options)
 
           #
@@ -67,8 +66,8 @@ module Msf
         #
         # This method is ugly for a number of reasons, but there doesn't
         # appear to be a way to be notified when the command is completed
-        # nor when the 
-        # 
+        # nor when the
+        #
         #
         # returns a valid xml string
         def create_report
@@ -82,25 +81,25 @@ module Msf
           begin
             xml_string = ""
             status = Timeout::timeout(240) {
-              # We don't know when the file is going to show up, so 
+              # We don't know when the file is going to show up, so
               # wait for it...
               until File.exists? report_path do
-                sleep 1
+              sleep 1
               end
 
-              # Read and clean up the file when it exists...
-              until xml_string.include? "</MetasploitV4>" do
-                  sleep 5
-                  xml_string = File.read(report_path)
-              end
-              
-              File.delete(report_path)
+            # Read and clean up the file when it exists...
+            until xml_string.include? "</MetasploitV4>" do
+              sleep 5
+              xml_string = File.read(report_path)
+            end
+
+            File.delete(report_path)
             }
           rescue Timeout::Error
             xml_string = "<MetasploitV4></MetasploitV4>"
           end
 
-        xml_string
+          xml_string
         end
 
         def cleanup
@@ -109,7 +108,7 @@ module Msf
         end
 
         def connected?
-          return true if @client.call("core.version")   
+          return true if @client.call("core.version")
         end
 
         # Public: Send a command to the msfrpc server via a dynamically
@@ -141,28 +140,29 @@ module Msf
           @client.call("console.read", console["id"])
           @client.call("console.write", console["id"], "#{command}\n")
 
-          # Initial read
+          # Initial read of output
           output_string = ""
           output = @client.call("console.read", console["id"])
-          
-          # TODO - hacky. -- There should be a way to check
+          output_string += "#{output['data']}"
+
+          # Very very hacky. -- There should be a way to check
           # status of a call to make sure that it isn't in an error
           # state. For now, check the output for known error heuristics
           return output_string if output_string =~ /(\[-\]|Error)/
 
           # Read until finished
-          while (output["busy"] == true) do
+          while (!output.has_key?("result")) do
+            return unless output["busy"]
             output_string += "#{output['data']}"
             output = @client.call("console.read", console["id"])
-            output_string = "Error" if output["result"] == "failure"
+          return "Error" if output["result"] == "failure"
           end
-        
+
           # Clean up console
           @client.call("console.destroy", console["id"])
 
           output_string
         end
-
       end
     end
   end
