@@ -41,16 +41,40 @@ module Msf
           #
           @client = Msf::RPC::Client.new(@options)
 
-          #
-          # Connect to the database based on the included options
-          #
+          # connect to the database 
           _connect_database
+        end
 
-          #
-          # Add a new workspace
-          #
-          @workspace_name = Time.now.utc.to_s.gsub(" ","_").gsub(":","_")
-          _create_workspace
+        # Public: clean up after ourselves 
+        #
+        # Returns nothing
+        def cleanup
+          _send_command("hosts -d")
+          _send_command("services -d")
+          _send_command("creds -d")
+        end
+
+        # Public: list all running threads
+        #
+        # Returns a hash of running threads
+        def list_threads
+          @client.call("core.thread_list")
+        end
+
+        # Public: determine if we're connected to the RPC server
+        #
+        # returns true/false
+        def rpc_connected?
+          return false unless @client.call("core.version")
+        true
+        end
+        
+        # Public: determine if we're connected to the RPC server
+        #
+        # returns true/false
+        def db_connected?
+          return false unless _send_command("db_status") =~ /connected/
+        true
         end
 
         # Public: Creates and retuns an xml report
@@ -91,33 +115,19 @@ module Msf
           xml_string
         end
 
-        def cleanup
-          _send_command("workspace -d #{@workspace_name}")
-          _send_command("db_disconnect")
-        end
-
-        def list_threads
-          @client.call("core.thread_list")
-        end
-
-        def rpc_connected?
-          return true if @client.call("core.version")
-        end
-
-        def db_connected?
-          return true if _send_command =~ /connected/
-        end
 
         private
 
+        # Private: connect to the database given the supplied / default options
+        #
+        # Returns nothing
         def _connect_database
           _send_command("db_connect #{@options[:db_user]}:#{@options[:db_pass]}@#{@options[:db_host]}/#{@options[:db_name]}")
         end
 
-        def _create_workspace
-          _send_command("workspace -a #{@workspace_name}")
-        end
-
+        # Private: provision a console and send the supplied command, capturing output
+        #
+        # Returns a valid string
         def _send_command(command)
           # Create the console and get its id
           console = @client.call("console.create")
@@ -146,7 +156,7 @@ module Msf
             end
 
           # Clean up console
-          #@client.call("console.destroy", console["id"])
+          @client.call("console.destroy", console["id"])
 
           output_string
         end
