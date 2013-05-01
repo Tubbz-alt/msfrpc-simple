@@ -31,7 +31,7 @@ module Msf
             :db_host => user_options[:db_host] || "localhost",
             :db_user => user_options[:db_user],
             :db_pass => user_options[:db_pass],
-            :db => user_options[:db_name] || "msf"
+            :db_name => user_options[:db_name] || "msf"
           }
 
           @options.merge!(user_options)
@@ -51,19 +51,12 @@ module Msf
           #
           @workspace_name = Time.now.utc.to_s.gsub(" ","_").gsub(":","_")
           _create_workspace
-
-          #
-          # Create a logger
-          #
-          #@logger = Msf::RPC::Simple::Logger.new
         end
 
         # Public: Creates and retuns an xml report
         #
         # This method is ugly for a number of reasons, but there doesn't
         # appear to be a way to be notified when the command is completed
-        # nor when the
-        #
         #
         # returns a valid xml string
         def create_report
@@ -99,18 +92,26 @@ module Msf
         end
 
         def cleanup
-          #_send_command("workspace -d #{@workspace_name}")
+          _send_command("workspace -d #{@workspace_name}")
           _send_command("db_disconnect")
         end
 
-        def connected?
+        def list_threads
+          @client.call("core.thread_list")
+        end
+
+        def rpc_connected?
           return true if @client.call("core.version")
+        end
+
+        def db_connected?
+          return true if _send_command =~ /connected/
         end
 
         private
 
         def _connect_database
-          _send_command("db_connect #{@options[:db_user]}:#{@options[:db_pass]}@#{@options[:db_host]}/#{@options[:db]}")
+          _send_command("db_connect #{@options[:db_user]}:#{@options[:db_pass]}@#{@options[:db_host]}/#{@options[:db_name]}")
         end
 
         def _create_workspace

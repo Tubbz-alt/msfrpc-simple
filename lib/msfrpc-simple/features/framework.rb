@@ -5,6 +5,13 @@ module Msf
         module Framework
 
           #
+          # This module runs db_nmap for a given range
+          #
+          def nmap_range(range)
+            _send_command("db_nmap #{range}")
+          end
+
+          #
           # This module runs a number of discovery modules
           #
           def discover_range(range)
@@ -15,9 +22,9 @@ module Msf
             #  - auxiliary/scanner/smb/smb_enumshares
             #  - auxiliary/scanner/smb/smb_enumusers
             modules_and_options = [
-              {:module_name => "auxiliary/scanner/http/http_version"},
+              #{:module_name => "auxiliary/scanner/http/http_version"},
               #{:module_name => "auxiliary/scanner/http/cert"},
-              {:module_name => "auxiliary/scanner/ftp/ftp_version"},
+              #{:module_name => "auxiliary/scanner/ftp/ftp_version"},
               #{:module_name => "auxiliary/scanner/h323/h323_version"},
               #{:module_name => "auxiliary/scanner/imap/imap_version"},
               #{:module_name => "auxiliary/scanner/portscan/syn"},
@@ -30,10 +37,10 @@ module Msf
               #{:module_name => "auxiliary/scanner/pcanywhere/pcanywhere_udp"},
               #{:module_name => "auxiliary/scanner/pop3/pop3_version"},
               #{:module_name => "auxiliary/scanner/postgres/postgres_version"},
-              {:module_name => "auxiliary/scanner/smb/smb_version"},
-              {:module_name => "auxiliary/scanner/snmp/snmp_enum"},
-              {:module_name => "auxiliary/scanner/ssh/ssh_version"},
-              {:module_name => "auxiliary/scanner/telnet/telnet_version"},
+              #{:module_name => "auxiliary/scanner/smb/smb_version"},
+              #{:module_name => "auxiliary/scanner/snmp/snmp_enum"},
+              #{:module_name => "auxiliary/scanner/ssh/ssh_version"},
+              #{:module_name => "auxiliary/scanner/telnet/telnet_version"},
               #{:module_name => "auxiliary/scanner/vmware/vmauthd_version"},
             ]
 
@@ -54,17 +61,13 @@ module Msf
           #
           # This module runs a number of _login modules
           #
-          def bruteforce_range(range, user_file=nil, pass_file=nil)
-
-            # these were too long for method arg defaults
-            user_file = user_file || '/opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt'
-            pass_file = pass_file || '/opt/metasploit/msf3/data/wordlists/pwnie_passwords.txt'
+          def bruteforce_range(range, user_file, pass_file)
 
             module_list = [
               {:module_name => "auxiliary/scanner/http/http_login"},
-              {:module_name => "auxiliary/scanner/smb/smb_login"},
-              {:module_name => "auxiliary/scanner/snmp/snmp_login"},
-              {:module_name => "auxiliary/scanner/ssh/ssh_login"},
+              #{:module_name => "auxiliary/scanner/smb/smb_login"},
+              #{:module_name => "auxiliary/scanner/snmp/snmp_login"},
+              #{:module_name => "auxiliary/scanner/ssh/ssh_login"},
             ]
 
             output = ""
