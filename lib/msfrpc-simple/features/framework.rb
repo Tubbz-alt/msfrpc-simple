@@ -13,14 +13,21 @@ module Msf
           # Returns nothing
           def nmap_range(range)
 
+            unique_string = Time.now.utc.to_s.gsub(" ","_").gsub(":","_")
+            nmap_report_path = "/tmp/metasploit_temp_#{unique_string}.xml"
+
             # Call out to nmap to scan the given range
-            `nmap --top-ports 100 -oX /tmp/metasploit_temp.xml #{range}`
+            `nmap --top-ports 100 -oX #{nmap_report_path} #{range}`
             
             # Import the XML into metasploit
-            _send_command("db_import /tmp/metasploit_temp.xml")
-            
+            _send_command("db_import #{nmap_report_path}")
+
             # Wait for a few seconds while the xml is imported
-            sleep 5        
+            sleep 10
+
+            # Remove the file
+            File.delete(nmap_report_path)
+
           end
 
           # Public: This module runs a number of discovery modules. This method should only
