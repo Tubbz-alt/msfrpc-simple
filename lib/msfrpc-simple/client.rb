@@ -25,7 +25,7 @@ module Msf
           # configure default options
           @options = {
             :project => user_options[:project] || "default",
-            :port => user_options[:project] || 55553,
+            :port => user_options[:port] || 55553,
             :user => user_options[:rpc_user],
             :pass => user_options[:rpc_pass],
             :db_host => user_options[:db_host] || "localhost",
