@@ -153,6 +153,10 @@ module Msf
               output_string += "#{output['data']}"
               output = @client.call("console.read", console["id"])
               return "Error" if output["result"] == "failure"
+              # A little bit of sleeping will prevent this infinite loop from
+              # hogging up large portions of CPU time. It also adds load to the
+              # msfrpc daemon as it will need to process these requests as wel..
+              sleep 0.1
             end
 
           # Clean up console
